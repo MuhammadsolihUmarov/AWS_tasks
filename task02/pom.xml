@@ -11,8 +11,8 @@
     <properties>
         <maven-shade-plugin.version>3.5.2</maven-shade-plugin.version>
         <syndicate.java.plugin.version>1.13.0</syndicate.java.plugin.version>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
+        <maven.compiler.source>16</maven.compiler.source>
+        <maven.compiler.target>16</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <src.dir>jsrc/main/java</src.dir>
         <resources.dir>jsrc/main/resources</resources.dir>
@@ -23,6 +23,12 @@
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-lambda-java-events</artifactId>
             <version>3.11.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.10.1</version>
         </dependency>
 
         <!-- AWS dependencies-->
@@ -37,20 +43,7 @@
             <artifactId>deployment-configuration-annotations</artifactId>
             <version>${syndicate.java.plugin.version}</version>
         </dependency>
-        <dependency>
-            <groupId>demo.custom.sdk</groupId>
-            <artifactId>commons-lang3-downloaded-library</artifactId>
-            <version>3.14.0</version>
-            <scope>system</scope>
-            <systemPath>${basedir}/lib/commons-lang3-3.14.0.jar</systemPath>
-        </dependency>
-        <dependency>
-            <groupId>demo.custom.sdk</groupId>
-            <artifactId>gson-downloaded-library</artifactId>
-            <version>2.10.1</version>
-            <scope>system</scope>
-            <systemPath>${basedir}/lib/gson-2.10.1.jar</systemPath>
-        </dependency>
+
     </dependencies>
 
     <build>
