@@ -8,7 +8,7 @@
     "resource_type" : "lambda",
     "runtime" : "java11",
     "architectures" : [ "arm64" ],
-    "iam_role_name" : "hello-lambda-role",
+    "iam_role_name" : "hello_world-role",
     "memory" : 1024,
     "timeout" : 300,
     "subnet_ids" : [ ],
@@ -24,13 +24,5 @@
       "auth_type" : "NONE",
       "invoke_mode" : "BUFFERED"
     }
-  },
-  "sdk-layer" : {
-    "name" : "sdk-layer",
-    "runtimes" : [ "java11" ],
-    "resource_type" : "lambda_layer",
-    "deployment_package" : "sdk-layer-assembly.zip",
-    "libraries" : [ "lib/commons-lang3-3.14.0.jar", "lib/gson-2.10.1.jar" ],
-    "architectures" : [ "arm64" ]
   }
 }
