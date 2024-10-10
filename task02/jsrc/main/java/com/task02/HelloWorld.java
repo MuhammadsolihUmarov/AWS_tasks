@@ -21,7 +21,7 @@ import java.util.Optional;
 import java.util.function.Function;
 
 @LambdaHandler(
-		lambdaName = "hello-lambda",
+		lambdaName = "hello_world",
 		roleName = "hello_world-role",
 		layers = {"sdk-layer"},
 		runtime = DeploymentRuntime.JAVA11,
