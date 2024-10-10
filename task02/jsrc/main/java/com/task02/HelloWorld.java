@@ -24,82 +24,108 @@ import java.util.function.Function;
 		lambdaName = "hello_world",
 		roleName = "hello_world-role",
 		layers = {"sdk-layer"},
+		aliasName = "learn",
 		runtime = DeploymentRuntime.JAVA11,
-		architecture = Architecture.ARM64,
 		logsExpiration = RetentionSetting.SYNDICATE_ALIASES_SPECIFIED
 )
 @LambdaUrlConfig(
 		authType = AuthType.NONE,
 		invokeMode = InvokeMode.BUFFERED
 )
-public class HelloWorld implements RequestHandler<APIGatewayV2HTTPEvent, APIGatewayV2HTTPResponse> {
+public class HelloWorld implements RequestHandler<Object, Map<String, Object>> {
 
-	private static final int SC_OK = 200;
-	private static final int SC_NOT_FOUND = 404;
-	private final Gson gson = new GsonBuilder().setPrettyPrinting().create();
-	private final Map<String, String> responseHeaders = Map.of("Content-Type", "application/json");
-	private final Map<RouteKey, Function<APIGatewayV2HTTPEvent, APIGatewayV2HTTPResponse>> routeHandlers = Map.of(
-			new RouteKey("GET", "/"), this::handleGetRoot,
-			new RouteKey("GET", "/hello"), this::handleGetHello
-	);
+	public Map<String, Object> handleRequest(Object request, Context context) {
+		Map<String, Object> resultMap = new LinkedHashMap<>();
 
-	@Override
-	public APIGatewayV2HTTPResponse handleRequest(APIGatewayV2HTTPEvent requestEvent, Context context) {
-		RouteKey routeKey = new RouteKey(getMethod(requestEvent), getPath(requestEvent));
-		return routeHandlers.getOrDefault(routeKey, this::notFoundResponse).apply(requestEvent);
+		try {
+			@SuppressWarnings("unchecked")
+			Map<String, Object> requestMap = (Map<String, Object>) request;
+			String rawPath = (String) requestMap.get("rawPath");
+			@SuppressWarnings("unchecked")
+			Map<String, Object> requestContext = (Map<String, Object>) requestMap.get("requestContext");
+			@SuppressWarnings("unchecked")
+			Map<String, Object> httpContext = (Map<String, Object>) requestContext.get("http");
+			String method = (String) httpContext.get("method");
+			if ("/hello".equals(rawPath) && "GET".equalsIgnoreCase(method)) {
+				resultMap.put("statusCode", 200);
+				resultMap.put("body", "{\"statusCode\": 200, \"message\": \"Hello from Lambda\"}");
+			}
+			else {
+				resultMap.put("statusCode", 400);
+				resultMap.put("body", "{\"statusCode\": 400, \"message\": \"" + String.format(
+						"Bad request syntax or unsupported method. Request path: %s. HTTP method: %s", rawPath, method) + "\"}");
+			}}
+		catch (Exception e) {}
+
+		return resultMap;
 	}
 
-	private APIGatewayV2HTTPResponse handleGetRoot(APIGatewayV2HTTPEvent requestEvent) {
-		return buildResponse(SC_OK, Body.ok("Use the path /hello to get greetings message"));
-	}
-
-	private APIGatewayV2HTTPResponse handleGetHello(APIGatewayV2HTTPEvent requestEvent) {
-		return buildResponse(SC_OK, Body.ok("Hello%s".formatted(
-				Optional.ofNullable(requestEvent.getQueryStringParameters())
-						.map(this::getUserName)
-						.map(", %s"::formatted)
-						.orElse(" from lambda! Use the query string parameter 'name' to specify your name")
-		)));
-	}
-
-	private APIGatewayV2HTTPResponse notFoundResponse(APIGatewayV2HTTPEvent requestEvent) {
-		return buildResponse(SC_NOT_FOUND, Body.error("The resource with method %s and path %s is not found".formatted(
-				getMethod(requestEvent),
-				getPath(requestEvent)
-		)));
-	}
-
-	private APIGatewayV2HTTPResponse buildResponse(int statusCode, Object body) {
-		return APIGatewayV2HTTPResponse.builder()
-				.withStatusCode(statusCode)
-				.withHeaders(responseHeaders)
-				.withBody(gson.toJson(body))
-				.build();
-	}
-
-	private String getMethod(APIGatewayV2HTTPEvent requestEvent) {
-		return requestEvent.getRequestContext().getHttp().getMethod();
-	}
-
-	private String getPath(APIGatewayV2HTTPEvent requestEvent) {
-		return requestEvent.getRequestContext().getHttp().getPath();
-	}
-
-	private String getUserName(Map<String, String> queryStringParameters) {
-		return queryStringParameters.get("name");
-	}
-
-
-	private record RouteKey(String method, String path) {
-	}
-
-	private record Body(String message, String error) {
-		static Body ok(String message) {
-			return new Body(message, null);
-		}
-
-		static Body error(String error) {
-			return new Body(null, error);
-		}
-	}
+//	private static final int SC_OK = 200;
+//	private static final int SC_NOT_FOUND = 404;
+//	private final Gson gson = new GsonBuilder().setPrettyPrinting().create();
+//	private final Map<String, String> responseHeaders = Map.of("Content-Type", "application/json");
+//	private final Map<RouteKey, Function<APIGatewayV2HTTPEvent, APIGatewayV2HTTPResponse>> routeHandlers = Map.of(
+//			new RouteKey("GET", "/"), this::handleGetRoot,
+//			new RouteKey("GET", "/hello"), this::handleGetHello
+//	);
+//
+//	@Override
+//	public APIGatewayV2HTTPResponse handleRequest(APIGatewayV2HTTPEvent requestEvent, Context context) {
+//		RouteKey routeKey = new RouteKey(getMethod(requestEvent), getPath(requestEvent));
+//		return routeHandlers.getOrDefault(routeKey, this::notFoundResponse).apply(requestEvent);
+//	}
+//
+//	private APIGatewayV2HTTPResponse handleGetRoot(APIGatewayV2HTTPEvent requestEvent) {
+//		return buildResponse(SC_OK, Body.ok("Use the path /hello to get greetings message"));
+//	}
+//
+//	private APIGatewayV2HTTPResponse handleGetHello(APIGatewayV2HTTPEvent requestEvent) {
+//		return buildResponse(SC_OK, Body.ok("Hello%s".formatted(
+//				Optional.ofNullable(requestEvent.getQueryStringParameters())
+//						.map(this::getUserName)
+//						.map(", %s"::formatted)
+//						.orElse(" from lambda! Use the query string parameter 'name' to specify your name")
+//		)));
+//	}
+//
+//	private APIGatewayV2HTTPResponse notFoundResponse(APIGatewayV2HTTPEvent requestEvent) {
+//		return buildResponse(SC_NOT_FOUND, Body.error("The resource with method %s and path %s is not found".formatted(
+//				getMethod(requestEvent),
+//				getPath(requestEvent)
+//		)));
+//	}
+//
+//	private APIGatewayV2HTTPResponse buildResponse(int statusCode, Object body) {
+//		return APIGatewayV2HTTPResponse.builder()
+//				.withStatusCode(statusCode)
+//				.withHeaders(responseHeaders)
+//				.withBody(gson.toJson(body))
+//				.build();
+//	}
+//
+//	private String getMethod(APIGatewayV2HTTPEvent requestEvent) {
+//		return requestEvent.getRequestContext().getHttp().getMethod();
+//	}
+//
+//	private String getPath(APIGatewayV2HTTPEvent requestEvent) {
+//		return requestEvent.getRequestContext().getHttp().getPath();
+//	}
+//
+//	private String getUserName(Map<String, String> queryStringParameters) {
+//		return queryStringParameters.get("name");
+//	}
+//
+//
+//	private record RouteKey(String method, String path) {
+//	}
+//
+//	private record Body(String message, String error) {
+//		static Body ok(String message) {
+//			return new Body(message, null);
+//		}
+//
+//		static Body error(String error) {
+//			return new Body(null, error);
+//		}
+//	}
 }
