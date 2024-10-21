@@ -29,6 +29,8 @@ import java.util.Map;
 )
 public class SqsHandler implements RequestHandler<Object, Map<String, Object>> {
 	public Map<String, Object> handleRequest(Object request, Context context) {
+		LambdaLogger logger = context.getLogger();
+		logger.log(request.toString());
 		System.out.println("Hello from lambda");
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		resultMap.put("statusCode", 200);
